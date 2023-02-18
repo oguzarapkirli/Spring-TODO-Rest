@@ -1,27 +1,56 @@
 package com.oguzarapkirli.springtodorest.model;
 
-import jakarta.persistence.*;
+import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.*;
 
-@Data
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Objects;
+
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Todo {
 
     @Id
-    @SequenceGenerator(name = "todo_id_seq", sequenceName = "todo_id_seq", allocationSize = 1)
-    @GeneratedValue(generator = "todo_id_seq", strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Hidden
     private long id;
 
-    @NotBlank(message = "Title is cannot be blank")
+    @Size(min = 3, max = 20, message = "Title must be at least 3 characters")
+    @NotBlank(message = "Title cannot be blank")
     private String title;
 
-    @Size(min = 10, message = "Description must be at least 10 characters")
+    @Size(min = 5, max = 100, message = "Description must be at least 5 characters")
+    @NotBlank(message = "Description cannot be blank")
     private String description;
 
-    private boolean isCompleted = false;
+    @Hidden
+    boolean completed = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User userId;
+    @Hidden
+    final Timestamp createdDate = new Timestamp(new Date().getTime());
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Todo todo = (Todo) o;
+        return id == todo.id && completed == todo.completed && title.equals(todo.title) && description.equals(todo.description) && Objects.equals(createdDate, todo.createdDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, description, completed, createdDate);
+    }
 }
